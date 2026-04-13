@@ -8,9 +8,30 @@ if(strpos($input, '/')===0){
         $response="Error: Ju keni vetem read() permission!";
     } else{
         switch($command){
-            case 'list':
+            case '/list':
                 $files=array_diff(scandir("."),array('.','..'));
                 $response="Files ne server: ".implode(", ",$files);
+                break;
+            case '/read':
+                if(file_exists($arg1) && !is_dir($arg1)){
+                    $response =file_get_contents($arg1);
+                }else{$response="Error: File nuk ekziston."; }
+                break;
+            case '/info':
+                if (file_exists($arg1)) {
+                 $response = "INFO: $arg1 | " . filesize($arg1) . " bytes | " . date("Y-m-d H:i", filemtime($arg1));
+                } else { $response = "Error: Nuk u gjet."; }
+                break;
+            case '/search':
+                $files = scandir(".");
+                $found = array_filter($files, function($f) use ($arg1) { return strpos($f, $arg1) !== false; });
+                $response = "Rezultatet: " . implode(", ", $found);
+                break;
+            case '/delete':
+                if (file_exists($arg1)) {
+                unlink($arg1);
+                $response = "File '$arg1' u fshi.";
+                } else { $response = "Error: File nuk u gjet."; }
                 break;
         }
     }
