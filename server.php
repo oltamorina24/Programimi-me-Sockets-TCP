@@ -50,4 +50,13 @@ if(strpos($input, '/')===0){
                 $response = "Komande e panjohur.";
                    }
                 }
+        }else {
+                $role = $is_admin ? "[ADMIN]" : "[USER]";
+                $response = "$role Mesazhi u mor.";
+            }
+            $final_response = $response . "\n";
+            @socket_write($client['socket'], $final_response, strlen($final_response));
         }
+    }
+    checkTimeouts();
+}
