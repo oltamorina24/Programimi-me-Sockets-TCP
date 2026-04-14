@@ -1,3 +1,47 @@
+<?php
+
+$host = "0.0.0.0";
+$tcp_port = 9000;
+$http_port = 8080;
+$max_clients = 6;
+$timeout_seconds = 300;
+
+$clients = [];
+$messages_log = [];
+$admin_client = null;
+
+$main_socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
+socket_set_option($main_socket, SOL_SOCKET, SO_REUSEADDR, 1);
+socket_bind($main_socket, $host, $tcp_port);
+socket_listen($main_socket, $max_clients);
+socket_set_nonblock($main_socket);
+
+$http_socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
+socket_set_option($http_socket, SOL_SOCKET, SO_REUSEADDR, 1);
+socket_bind($http_socket, $host, $http_port);
+socket_listen($http_socket, 5);
+socket_set_nonblock($http_socket);
+
+echo "TCP Server nisi ne portin $tcp_port...\n";
+echo "HTTP Monitoring nisi ne portin $http_port...\n";
+
+while(true) {
+    $read =[];
+    $read[] = $main_socket;
+    $read[] = $http_socket;
+
+    foreach ($clients as $c) {
+        $read[] = $c['socket'];
+    }
+
+    $write = null;
+    $except = null;
+
+    if (socket_select($read, $write, $except, 1) < 1) {
+        checkTimeouts();
+        continue;
+    }
+}
 if(strpos($input, '/')===0){
     $parts = explode(' ',$input, 3);
     $command = $parts[0];
