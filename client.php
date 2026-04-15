@@ -13,4 +13,11 @@ if ($result === false) { die("Lidhja deshtoi. Sigurohu qe serveri eshte hapur!\n
 echo "U lidhet me sukses!\n";
 echo "------------------------------------------------------------\n";
 
+while (true) {
+    echo "Ti: ";
+    $line = trim(fgets(STDIN)); 
 
+    if ($line == 'exit') break;
+    if ($line == '') continue;
+
+    $message = $line;
