@@ -22,7 +22,6 @@ function handleHttpRequest($http_socket) {
     
     $req = @socket_read($conn, 1024);
     
-    // Këtu i shtojmë fushat që mungojnë
     $stats = [
         "status" => "Online",
         "klientet_aktiv" => count($clients),
@@ -31,14 +30,5 @@ function handleHttpRequest($http_socket) {
         "historiku_i_mesazheve" => $messages_log          
     ];
     
-    $body = json_encode($stats, JSON_PRETTY_PRINT);
-    $response = "HTTP/1.1 200 OK\r\n";
-    $response .= "Content-Type: application/json\r\n";
-    $response .= "Content-Length: " . strlen($body) . "\r\n";
-    $response .= "Connection: close\r\n\r\n";
-    $response .= $body;
-    
-    @socket_write($conn, $response, strlen($response));
-    @socket_close($conn);
 }
 ?>
