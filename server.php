@@ -15,3 +15,30 @@ if(strpos($input, '/')===0){
         }
     }
 }
+function handleHttpRequest($http_socket) {
+    global $clients, $messages_log; 
+    $conn = @socket_accept($http_socket);
+    if ($conn === false) return;
+    
+    $req = @socket_read($conn, 1024);
+    
+    // Këtu i shtojmë fushat që mungojnë
+    $stats = [
+        "status" => "Online",
+        "klientet_aktiv" => count($clients),
+        "mesazhet_total" => count($messages_log),
+        "lista_e_ip_adresave" => array_column($clients, 'ip'), 
+        "historiku_i_mesazheve" => $messages_log          
+    ];
+    
+    $body = json_encode($stats, JSON_PRETTY_PRINT);
+    $response = "HTTP/1.1 200 OK\r\n";
+    $response .= "Content-Type: application/json\r\n";
+    $response .= "Content-Length: " . strlen($body) . "\r\n";
+    $response .= "Connection: close\r\n\r\n";
+    $response .= $body;
+    
+    @socket_write($conn, $response, strlen($response));
+    @socket_close($conn);
+}
+?>
