@@ -3,7 +3,7 @@ $host = "0.0.0.0";
 $tcp_port = 9000;
 $http_port = 9090; 
 $max_clients = 6;
-$timeout_seconds = 300; 
+$timeout_seconds = 200; 
 
 $clients = [];
 $messages_log = [];
@@ -48,6 +48,7 @@ while (true) {
             if (count($clients) >= $max_clients) {
                 $msg = "Serveri plot. Provo me vone.\n";
                 socket_write($new_socket, $msg, strlen($msg));
+                usleep(100000);
                 socket_close($new_socket);
             } else {
                 socket_getpeername($new_socket, $ip);
@@ -92,90 +93,113 @@ while (true) {
             $input = trim($input);
             $clients[$id]['last_seen'] = time();
             $clients[$id]['requests']++; 
+            echo "Klienti ({$client['ip']}) kerkoi: $input\n";
             $messages_log[] = ["ip" => $client['ip'], "msg" => substr($input, 0, 50), "time" => date("H:i:s")];
 
             $response = "";
-if(strpos($input, '/')===0){
-    $parts = explode(' ',$input, 3);
-    $command = $parts[0];
-    $arg1 = isset($parts[1]) ? trim ($parts[1]) : '';
-    $arg2 = isset($parts[2]) ? $parts[2] : '';
-    $admin_only_commands=['/delete','/upload','/execute'];
-    if(!$is_admin && in_array($command,$admin_only_commands)){
-        $response="Error: Ju keni vetem read() permission!";
-    } else{
-        switch($command){
-            case '/list':
-                $files=array_diff(scandir("."),array('.','..'));
-                $response="Files ne server: ".implode(", ",$files);
-                break;
-            case '/read':
-                if(file_exists($arg1) && !is_dir($arg1)){
-                    $response =file_get_contents($arg1);
-                }else{$response="Error: File nuk ekziston."; }
-                break;
-            case '/info':
-                if (file_exists($arg1)) {
-                 $response = "INFO: $arg1 | " . filesize($arg1) . " bytes | " . date("Y-m-d H:i", filemtime($arg1));
-                } else { $response = "Error: Nuk u gjet."; }
-                break;
-            case '/search':
-                $files = scandir(".");
-                $found = array_filter($files, function($f) use ($arg1) { return strpos($f, $arg1) !== false; });
-                $response = "Rezultatet: " . implode(", ", $found);
-                break;
-            case '/delete':
-                if (file_exists($arg1)) {
-                unlink($arg1);
-                $response = "File '$arg1' u fshi.";
-                } else { $response = "Error: File nuk u gjet.";
-                }break;
-            case '/upload': 
-                if ($arg1 !== '' && $arg2 !== '') {
-                file_put_contents($arg1, $arg2); 
-                $response = "File '$arg1' u ngarkua me sukses.";
-                } else { 
-                $response = "Error: Mungon emri ose permbajtja."; 
-                }break;
-            case '/download':
-                if (file_exists($arg1) && !is_dir($arg1)) {
-                $response = "FILE_DATA:" . $arg1 . ":" . file_get_contents($arg1);
-                } else { 
-                $response = "Error: File nuk ekziston."; 
-                }break;
-                default:
-                $response = "Komande e panjohur.";
+            if(strpos($input, '/')===0){
+              $parts = explode(' ',$input, 3);
+              $command = $parts[0];
+              $arg1 = isset($parts[1]) ? trim ($parts[1]) : '';
+              $arg2 = isset($parts[2]) ? $parts[2] : '';
+              $admin_only_commands=['/delete','/upload','/execute'];
+
+            if(!$is_admin && in_array($command,$admin_only_commands)){
+                 $response="Error: Ju keni vetem read() permission!";
+            } else{
+               switch($command){
+                   case '/list':
+                        $files=array_diff(scandir("."),array('.','..'));
+                        $response="Files ne server: ".implode(", ",$files);
+                        break;
+                  case '/read':
+                        if(file_exists($arg1) && !is_dir($arg1)){
+                        $response =file_get_contents($arg1);
+                     }else{$response="Error: File nuk ekziston."; }
+                     break;
+                  case '/info':
+                       if (file_exists($arg1)) {
+                       $response = "INFO: $arg1 | " . filesize($arg1) . " bytes | " . date("Y-m-d H:i", filemtime($arg1));
+                     } else { $response = "Error: Nuk u gjet."; }
+                     break;
+                  case '/search':
+                       $files = scandir(".");
+                       $found = array_filter($files, function($f) use ($arg1) { return strpos($f, $arg1) !== false; });
+                       $response = "Rezultatet: " . implode(", ", $found);
+                         break;
+                  case '/delete':
+                       if (file_exists($arg1)) {
+                       unlink($arg1);
+                       $response = "File '$arg1' u fshi.";
+                    } else { $response = "Error: File nuk u gjet.";
+                      }break;
+                  case '/upload': 
+                      if ($arg1 !== '' && $arg2 !== '') {
+                      file_put_contents($arg1, $arg2); 
+                      $response = "File '$arg1' u ngarkua me sukses.";
+                    } else { 
+                      $response = "Error: Mungon emri ose permbajtja."; 
+                      }break;
+                  case '/download':
+                      if (file_exists($arg1) && !is_dir($arg1)) {
+                      $response = "FILE_DATA:" . $arg1 . ":" . file_get_contents($arg1);
+                    } else { 
+                      $response = "Error: File nuk ekziston."; 
+                      }break;
+                 default:
+                     $response = "Komande e panjohur.";
                    }
                 }
-        }else {
+        } else {
                 $role = $is_admin ? "[ADMIN]" : "[USER]";
                 $response = "$role Mesazhi u mor.";
             }
-            $final_response = $response . "\n";
+            $final_response = $response . " | (Kerkesa nr: " . $clients[$id]['requests'] . ")\n";
             @socket_write($client['socket'], $final_response, strlen($final_response));
         }
     }
     checkTimeouts();
 }
-function handleHttpRequest($http_socket) {
-    global $clients, $messages_log; // Ky rresht është kritik për t'i marrë të dhënat
+function checkTimeouts() {
+    global $clients, $timeout_seconds;
+    foreach ($clients as $id => $client) {
+        if (time() - $client['last_seen'] > $timeout_seconds) {
+            closeConnection($id);
+        }
+    }
+}
+
+function closeConnection($id) {
+    global $clients, $admin_client;
+    if (isset($clients[$id])) { 
+        $ip = $clients[$id]['ip'];
+        @socket_close($clients[$id]['socket']);
+        unset($clients[$id]);
+        if ($admin_client === $id) {
+            $admin_client = null;
+        echo "--- [INFO] Admini ($ip) u shkeput. ---\n";
+        } else {
+            echo "--- [INFO] Klienti ($ip) u shkeput. ---\n";
+        }
+    }
+}
+function handleHttpRequest($http_socket) { 
+    global $clients, $messages_log; 
     
     $conn = @socket_accept($http_socket);
     if ($conn === false) return;
     
     $req = @socket_read($conn, 1024);
     
-    // Këtu i shtojmë fushat që mungojnë
     $stats = [
         "status" => "Online",
         "klientet_aktiv" => count($clients),
         "mesazhet_total" => count($messages_log),
-        "lista_e_ip_adresave" => array_column($clients, 'ip'), // Merr vetëm IP-të nga klientët
-        "historiku_i_mesazheve" => $messages_log           // Këtu dalin mesazhet e klientëve
+        "lista_e_ip_adresave" => array_column($clients, 'ip'), 
+        "historiku_i_mesazheve" => $messages_log           
     ];
      $body = json_encode($stats, JSON_PRETTY_PRINT);
     
-    // Header-at HTTP (sigurohemi që Content-Type është JSON)
     $response = "HTTP/1.1 200 OK\r\n";
     $response .= "Content-Type: application/json\r\n";
     $response .= "Content-Length: " . strlen($body) . "\r\n";
