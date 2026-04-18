@@ -1,8 +1,8 @@
 # Programimi-me-Sockets-TCP
 
-📡 Rrjetat Kompjuterike – Projekti 2
+Rrjetat Kompjuterike – Projekti 2
 TCP Server & Client në C
-📌 Përshkrimi i Projektit
+ Përshkrimi i Projektit
 
 Ky projekt implementon një server TCP dhe klientë në gjuhën C, të cilët komunikojnë në një rrjet real. Serveri menaxhon lidhjet e shumë klientëve, përpunon kërkesat e tyre dhe ruan mesazhet për monitorim. Gjithashtu, serveri përfshin një HTTP server të thjeshtë për monitorimin e statistikave në kohë reale.
 
@@ -11,7 +11,7 @@ Gjuha programuese: C
 Protokolli: TCP
 Socket Programming (POSIX)
 HTTP (server i thjeshtë manual)
-🖥️ Funksionalitetet e Serverit
+Funksionalitetet e Serverit
 1. Konfigurimi
 Serveri përdor:
 IP adresë: 0.0.0.0
@@ -50,7 +50,7 @@ numrin e mesazheve
 listën e mesazheve
 Format:
 JSON ose tekst
-💻 Funksionalitetet e Klientit
+Funksionalitetet e Klientit
 1. Lidhja me server
 Klienti lidhet përmes:
 IP adresës
@@ -77,7 +77,7 @@ Nuk mund të modifikojë file
 4. Prioriteti
 Klientët admin kanë:
 përgjigje më të shpejtë
-▶️ Udhëzime për Ekzekutim
+Udhëzime për Ekzekutim
 1. Kompilimi
 Server:
 gcc server.c -o server
@@ -96,7 +96,7 @@ Lidhu me serverin nga secili
 Në browser:
 
 http://localhost:8080/stats
-📊 Shembuj Ekzekutimi
+Shembuj Ekzekutimi
 Shembull 1 – Mesazh
 Client: Hello Server
 Server: Message received
@@ -111,24 +111,24 @@ Shembull 3 – HTTP /stats
   "messages": 10,
   "ips": ["192.168.0.2", "192.168.0.3"]
 }
-📁 Struktura e Projektit
+Struktura e Projektit
 project/
 │
 ├── server.c
 ├── client.c
 ├── files/          # file të serverit
 ├── README.md
-👥 Kontributi
+Kontributi
 Secili anëtar:
 ka kontribuar në kod
 ka testuar klientin dhe serverin
 ka bërë commit në GitHub
-⚠️ Vërejtje
+Vërejtje
 Projekti duhet të ekzekutohet në rrjet real
 Minimumi 4 klientë aktivë
 Repository duhet të jetë publik
 Commit-et duhet të jenë të vazhdueshme
-✅ Përfundim
+Përfundim
 
 Ky projekt demonstron:
 
